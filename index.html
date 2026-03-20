@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Nurly — Work Index</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet"/>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #f6f4ef;
+  --ink: #0c0c0c;
+  --mid: #888;
+  --faint: #d6d2ca;
+  --serif: 'Playfair Display', Georgia, serif;
+  --mono: 'DM Mono', monospace;
+}
+
+html, body { height: 100%; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--serif);
+  -webkit-font-smoothing: antialiased;
+  cursor: none;
+  overflow-x: hidden;
+}
+
+/* ── GRAIN ── */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 9000;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.78' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23g)'/%3E%3C/svg%3E");
+  opacity: .035;
+}
+
+/* ── CURSOR ── */
+.c-dot {
+  position: fixed; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--ink); transform: translate(-50%,-50%);
+  z-index: 9999; pointer-events: none;
+}
+.c-ring {
+  position: fixed; width: 30px; height: 30px; border-radius: 50%;
+  border: 1px solid var(--ink);
+  transform: translate(-50%,-50%);
+  z-index: 9998; pointer-events: none;
+  transition: width .25s, height .25s, opacity .25s, border-color .25s;
+}
+body.hov .c-ring { width: 50px; height: 50px; opacity: .35; }
+
+/* ── LOADER ── */
+#loader {
+  position: fixed; inset: 0; z-index: 5000;
+  background: var(--ink);
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column; gap: 16px;
+}
+.l-word {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .45em;
+  color: rgba(246,244,239,.25); text-transform: uppercase;
+  overflow: hidden; white-space: nowrap;
+  width: 0; animation: widen 1s ease .3s forwards;
+}
+.l-bar { width: 100px; height: 1px; background: rgba(246,244,239,.1); position: relative; }
+.l-fill {
+  position: absolute; inset: 0; background: rgba(246,244,239,.5);
+  transform: scaleX(0); transform-origin: left;
+  animation: fill 1.1s ease .5s forwards;
+}
+@keyframes widen { to { width: 80px; } }
+@keyframes fill   { to { transform: scaleX(1); } }
+
+/* ── PAGE ── */
+.page { opacity: 0; transition: opacity .9s ease; }
+.page.show { opacity: 1; }
+
+/* ── NAV ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 400;
+  padding: 24px 52px;
+  display: flex; justify-content: space-between; align-items: center;
+  background: rgba(246,244,239,.88);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--faint);
+}
+.nav-logo {
+  font-family: var(--serif); font-size: 15px; font-weight: 700;
+  letter-spacing: -.02em; color: var(--ink); text-decoration: none;
+}
+.nav-tag {
+  font-family: var(--mono); font-size: 9px; letter-spacing: .18em;
+  text-transform: uppercase; color: var(--mid);
+  display: flex; align-items: center; gap: 10px;
+}
+.nav-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--ink); animation: blink 2.2s ease infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
+
+/* ── HEADER ── */
+.header {
+  padding: 144px 52px 56px;
+  border-bottom: 1px solid var(--faint);
+  display: grid; grid-template-columns: 1fr auto;
+  align-items: end; gap: 40px;
+}
+.header-left {}
+.header-eyebrow {
+  font-family: var(--mono); font-size: 9px; letter-spacing: .22em;
+  text-transform: uppercase; color: var(--mid);
+  margin-bottom: 20px;
+  opacity: 0; animation: up .6s ease 1.4s forwards;
+}
+h1 {
+  font-size: clamp(3.8rem, 10vw, 9rem);
+  font-weight: 900; line-height: .88; letter-spacing: -.05em;
+}
+.hl { display: block; overflow: hidden; padding-bottom: .12em; margin-bottom: -.12em; }
+.hi {
+  display: block; transform: translateY(110%);
+  animation: up .9s cubic-bezier(.16,1,.3,1) forwards;
+}
+.hl:nth-child(1) .hi { animation-delay: 1.5s; }
+.hl:nth-child(2) .hi { animation-delay: 1.65s; font-style: italic; }
+@keyframes up { to { transform: translateY(0); } }
+
+.header-right {
+  text-align: right;
+  opacity: 0; animation: fade .7s ease 2s forwards;
+}
+.header-count {
+  font-size: clamp(4rem, 8vw, 7rem);
+  font-weight: 900; letter-spacing: -.05em; line-height: 1;
+  color: rgba(12,12,12,.07); font-style: italic;
+}
+.header-count-label {
+  font-family: var(--mono); font-size: 9px; letter-spacing: .18em;
+  text-transform: uppercase; color: var(--mid); margin-top: 8px;
+}
+@keyframes fade { to { opacity: 1; } }
+
+/* ── MARQUEE ── */
+.marquee {
+  background: var(--ink); overflow: hidden;
+  padding: 13px 0; border-bottom: 1px solid var(--faint);
+}
+.marquee-track {
+  display: flex; gap: 44px;
+  animation: march 20s linear infinite;
+  white-space: nowrap;
+}
+.marquee-track span {
+  font-family: var(--mono); font-size: 9px; letter-spacing: .22em;
+  text-transform: uppercase; color: rgba(246,244,239,.35);
+  flex-shrink: 0;
+}
+.marquee-track b { color: rgba(246,244,239,.12); font-weight: 400; }
+@keyframes march { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+/* ── PROJECT LIST ── */
+.projects { }
+
+.project {
+  display: grid;
+  grid-template-columns: 72px 1fr 260px;
+  gap: 0;
+  border-bottom: 1px solid var(--faint);
+  text-decoration: none; color: var(--ink);
+  position: relative; overflow: hidden;
+  opacity: 0; transform: translateY(24px);
+  transition: opacity .8s ease, transform .8s ease;
+}
+.project.visible { opacity: 1; transform: none; }
+.project:nth-child(1) { transition-delay: .05s; }
+.project:nth-child(2) { transition-delay: .15s; }
+.project:nth-child(3) { transition-delay: .25s; }
+
+/* black fill on hover */
+.project::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: var(--ink);
+  transform: scaleY(0); transform-origin: bottom;
+  transition: transform .55s cubic-bezier(.16,1,.3,1);
+  z-index: 0;
+}
+.project:hover::after { transform: scaleY(1); }
+
+/* columns go light on hover via class toggling via CSS */
+.project:hover .p-num,
+.project:hover .p-title,
+.project:hover .p-category,
+.project:hover .p-desc,
+.project:hover .p-tag,
+.project:hover .p-links-label,
+.project:hover .p-link,
+.project:hover .p-arrow { color: rgba(246,244,239,.9); }
+.project:hover .p-tag { border-color: rgba(246,244,239,.18); color: rgba(246,244,239,.5); }
+.project:hover .p-divider { background: rgba(246,244,239,.08); }
+.project:hover .p-link { border-color: rgba(246,244,239,.15); }
+.project:hover .p-num { color: rgba(246,244,239,.2); }
+
+.p-num-col {
+  padding: 40px 0 40px 52px;
+  border-right: 1px solid var(--faint);
+  display: flex; align-items: flex-start; justify-content: center;
+  position: relative; z-index: 1;
+}
+.project:hover .p-num-col { border-right-color: rgba(246,244,239,.08); }
+.p-num {
+  font-family: var(--mono); font-size: 9px; letter-spacing: .12em;
+  color: var(--mid); transition: color .35s;
+  writing-mode: vertical-rl; transform: rotate(180deg);
+}
+
+.p-body {
+  padding: 40px 40px 40px 40px;
+  position: relative; z-index: 1;
+}
+.p-category {
+  font-family: var(--mono); font-size: 9px; letter-spacing: .2em;
+  text-transform: uppercase; color: var(--mid);
+  margin-bottom: 16px; transition: color .35s;
+}
+.p-title {
+  font-size: clamp(2rem, 4.5vw, 3.8rem);
+  font-weight: 900; letter-spacing: -.04em; line-height: .92;
+  margin-bottom: 20px; transition: color .35s;
+}
+.p-desc {
+  font-family: var(--mono); font-size: 11px; color: var(--mid);
+  line-height: 1.8; max-width: 420px;
+  transition: color .35s;
+}
+.p-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 20px; }
+.p-tag {
+  font-family: var(--mono); font-size: 8px; letter-spacing: .1em;
+  text-transform: uppercase; padding: 4px 10px;
+  border: 1px solid var(--faint); color: var(--mid);
+  transition: color .35s, border-color .35s;
+}
+
+.p-side {
+  padding: 40px 52px 40px 40px;
+  border-left: 1px solid var(--faint);
+  display: flex; flex-direction: column; justify-content: space-between;
+  position: relative; z-index: 1;
+}
+.project:hover .p-side { border-left-color: rgba(246,244,239,.08); }
+
+.p-arrow {
+  font-size: 2.5rem; color: var(--mid);
+  align-self: flex-end;
+  transition: transform .35s cubic-bezier(.16,1,.3,1), color .35s;
+}
+.project:hover .p-arrow { transform: translate(6px,-6px); color: rgba(246,244,239,.9); }
+
+.p-links { display: flex; flex-direction: column; gap: 8px; }
+.p-links-label {
+  font-family: var(--mono); font-size: 8px; letter-spacing: .18em;
+  text-transform: uppercase; color: var(--mid);
+  margin-bottom: 4px; transition: color .35s;
+}
+.p-link {
+  font-family: var(--mono); font-size: 10px; color: var(--mid);
+  text-decoration: none; padding: 6px 0;
+  border-bottom: 1px solid var(--faint);
+  display: flex; justify-content: space-between;
+  transition: color .35s, border-color .35s;
+}
+.p-link:hover { color: var(--ink); }
+.project:hover .p-link:hover { color: #fff; }
+.p-divider { height: 1px; background: var(--faint); margin: 20px 0; transition: background .35s; }
+
+/* ── FOOTER ── */
+footer {
+  padding: 28px 52px;
+  display: flex; justify-content: space-between; align-items: center;
+  font-family: var(--mono); font-size: 9px; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--mid);
+  border-top: 1px solid var(--faint);
+}
+
+/* ── MOBILE ── */
+@media (max-width: 768px) {
+  nav { padding: 18px 20px; }
+  .header { padding: 120px 20px 44px; grid-template-columns: 1fr; }
+  .header-right { text-align: left; }
+  h1 { font-size: 3.5rem; }
+  .project { grid-template-columns: 1fr; }
+  .p-num-col { display: none; }
+  .p-body { padding: 32px 20px; }
+  .p-side { padding: 0 20px 32px; border-left: none; flex-direction: row-reverse; align-items: center; }
+  .p-divider { display: none; }
+  footer { flex-direction: column; gap: 6px; padding: 20px; text-align: center; }
+  body { cursor: auto; }
+  .c-dot, .c-ring { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="c-dot" id="cDot"></div>
+<div class="c-ring" id="cRing"></div>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="l-word">nurly</div>
+  <div class="l-bar"><div class="l-fill"></div></div>
+</div>
+
+<div class="page" id="page">
+
+  <!-- NAV -->
+  <nav>
+    <a class="nav-logo" href="#">Nurly.</a>
+    <div class="nav-tag">
+      <div class="nav-dot"></div>
+      Work Index — 2025
+    </div>
+  </nav>
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-left">
+      <div class="header-eyebrow">Selected projects — Almaty, KZ</div>
+      <h1>
+        <span class="hl"><span class="hi">My</span></span>
+        <span class="hl"><span class="hi">work.</span></span>
+      </h1>
+    </div>
+    <div class="header-right">
+      <div class="header-count">03</div>
+      <div class="header-count-label">Projects</div>
+    </div>
+  </div>
+
+  <!-- MARQUEE -->
+  <div class="marquee">
+    <div class="marquee-track">
+      <span>Bakery</span><b>·</b>
+      <span>Sports News</span><b>·</b>
+      <span>Robotics</span><b>·</b>
+      <span>Web Design</span><b>·</b>
+      <span>VEX V5</span><b>·</b>
+      <span>Almaty, KZ</span><b>·</b>
+      <span>HTML · CSS · JS</span><b>·</b>
+      <span>Bakery</span><b>·</b>
+      <span>Sports News</span><b>·</b>
+      <span>Robotics</span><b>·</b>
+      <span>Web Design</span><b>·</b>
+      <span>VEX V5</span><b>·</b>
+      <span>Almaty, KZ</span><b>·</b>
+      <span>HTML · CSS · JS</span><b>·</b>
+    </div>
+  </div>
+
+  <!-- PROJECTS -->
+  <div class="projects">
+
+    <!-- 01 — Flake & Cake -->
+    <a class="project" href="https://flakecake.com" target="_blank">
+      <div class="p-num-col"><div class="p-num">001</div></div>
+      <div class="p-body">
+        <div class="p-category">Bakery · Branding · Web</div>
+        <div class="p-title">Flake<br>&amp; Cake</div>
+        <div class="p-desc">
+          Website for a bakery. Clean, warm design that reflects
+          the brand's identity — pastries, passion, and craft.
+        </div>
+        <div class="p-tags">
+          <span class="p-tag">Web Design</span>
+          <span class="p-tag">Branding</span>
+          <span class="p-tag">HTML/CSS</span>
+        </div>
+      </div>
+      <div class="p-side">
+        <div class="p-arrow">↗</div>
+        <div>
+          <div class="p-links-label">Links</div>
+          <div class="p-links">
+            <span class="p-link">flakecake.com <span>→</span></span>
+            <span class="p-link">instagram.com/flakecake.us <span>→</span></span>
+          </div>
+        </div>
+      </div>
+    </a>
+
+    <!-- 02 — Alyp Sok -->
+    <a class="project" href="https://alypsok.kz/" target="_blank">
+      <div class="p-num-col"><div class="p-num">002</div></div>
+      <div class="p-body">
+        <div class="p-category">Sports News · Portal · Editorial</div>
+        <div class="p-title">Alyp<br>Sok</div>
+        <div class="p-desc">
+          Sports news portal covering Kazakh athletics.
+          Fast, editorial-first design built for readers on the go.
+        </div>
+        <div class="p-tags">
+          <span class="p-tag">News Portal</span>
+          <span class="p-tag">Editorial</span>
+          <span class="p-tag">Sports</span>
+        </div>
+      </div>
+      <div class="p-side">
+        <div class="p-arrow">↗</div>
+        <div>
+          <div class="p-links-label">Links</div>
+          <div class="p-links">
+            <span class="p-link">alypsok.kz <span>→</span></span>
+            <span class="p-link">instagram.com/alyp.sok <span>→</span></span>
+          </div>
+        </div>
+      </div>
+    </a>
+
+    <!-- 03 — Liberty Robotics -->
+    <a class="project" href="https://libertyteam.github.io/site/" target="_blank">
+      <div class="p-num-col"><div class="p-num">003</div></div>
+      <div class="p-body">
+        <div class="p-category">Robotics · VEX V5 · Team Site</div>
+        <div class="p-title">Liberty<br>Robotics</div>
+        <div class="p-desc">
+          Official site for a VEX V5 competition robotics team.
+          Showcases the team, robot builds, and competition results.
+        </div>
+        <div class="p-tags">
+          <span class="p-tag">VEX V5</span>
+          <span class="p-tag">Team Site</span>
+          <span class="p-tag">GitHub Pages</span>
+        </div>
+      </div>
+      <div class="p-side">
+        <div class="p-arrow">↗</div>
+        <div>
+          <div class="p-links-label">Links</div>
+          <div class="p-links">
+            <span class="p-link">libertyteam.github.io <span>→</span></span>
+            <span class="p-link">instagram.com/liberty_robotics <span>→</span></span>
+          </div>
+        </div>
+      </div>
+    </a>
+
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <span>Nurly © 2025</span>
+    <span>Student · Developer · Almaty, KZ</span>
+    <span>3 projects & counting</span>
+  </footer>
+
+</div>
+
+<script>
+/* LOADER */
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    const L = document.getElementById('loader');
+    L.style.transition = 'opacity .65s ease';
+    L.style.opacity = '0';
+    setTimeout(() => {
+      L.style.display = 'none';
+      document.getElementById('page').classList.add('show');
+    }, 650);
+  }, 1600);
+});
+
+/* CURSOR */
+const dot = document.getElementById('cDot');
+const ring = document.getElementById('cRing');
+let mx=0, my=0, rx=0, ry=0;
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  dot.style.left = mx + 'px'; dot.style.top = my + 'px';
+});
+document.querySelectorAll('a').forEach(el => {
+  el.addEventListener('mouseenter', () => document.body.classList.add('hov'));
+  el.addEventListener('mouseleave', () => document.body.classList.remove('hov'));
+});
+(function loop() {
+  rx += (mx - rx) * .11; ry += (my - ry) * .11;
+  ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+  requestAnimationFrame(loop);
+})();
+
+/* SCROLL REVEAL */
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); }
+  });
+}, { threshold: .06 });
+document.querySelectorAll('.project').forEach(p => io.observe(p));
+</script>
+</body>
+</html>
